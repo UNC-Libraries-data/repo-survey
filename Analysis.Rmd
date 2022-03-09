@@ -1,0 +1,139 @@
+---
+title: "Repositories"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=F, warning=F}
+library(tidyverse)
+library(coin)
+library(knitr)
+library(kableExtra)
+```
+### data ingest
+
+```{r message=F}
+data <- read_csv("Data/analysis-data.csv")
+```
+## Session Info
+```{r}
+sessionInfo()
+
+```
+## Initial Statistical Exploration
+```{r message=F,warning=F,fig.width=10,fig.height=10}
+library(GGally)
+data %>% 
+    mutate(nondata = Staff - `Data Staff`) %>% 
+  select(-`#`) %>% 
+  ggpairs(progress=FALSE)
+  
+```
+
+## Hypothesis 1
+```{r}
+par(mfrow=c(1,2))
+with (data,plot(Staff, Depositors))
+with (data,plot(rank(Staff), rank(Depositors)))
+```
+
+```{r}
+with (data,plot(rank(Staff), rank(Depositors)))
+```
+```{r}
+data %>% 
+  group_by(`Staff`) %>% 
+  summarize(count = sum(!is.na(Depositors)),
+    median = median(Depositors, na.rm=T)) %>% 
+  kable() %>% kable_styling(position = "left",full_width = F)
+```
+
+```{r}
+coin::spearman_test(Depositors~Staff, data=data)
+
+```
+```{r}
+with(data,cor(Depositors,Staff,method="spearman", use="complete.obs"))
+
+```
+Look at rho: `r with(data,cor(Depositors,Staff,method="spearman", use="complete.obs"))` for direction.  Both tests find a significant result at 95%.
+
+## Hypothesis 2
+```{r}
+data %>% group_by(`AdvancedDC/Inctvs`) %>% 
+  summarize(count = sum(!is.na(Depositors)),
+    median = median(Depositors, na.rm=T),
+    mean = mean(Depositors, na.rm=T)) %>% 
+  kable() %>% kable_styling(position = "left",full_width = F)
+
+```
+
+```{r}
+coin::wilcox_test(Depositors ~ as.factor(`AdvancedDC/Inctvs`), data=data)
+```
+Asymptotic Wilcoxon-Mann-Whitney Test finds significant difference in deposit rates between the two groups at the 95% level.  Note p values were computed using mid-ranks to break ties.
+
+## Hypothesis 3
+```{r}
+data %>% group_by(`AdvancedDC/Inctvs`) %>% 
+  summarize(count = sum(!is.na(Depositors)),
+    median = median(Depositors, na.rm=T)) %>% 
+  kable() %>% kable_styling(position = "left",full_width = F)
+```
+
+
+## Hypothesis 4
+```{r}
+coin::wilcox_test(Depositors ~ as.factor(SocialMedia), data=data)
+```
+
+```{r}
+data %>% group_by(SocialMedia) %>% 
+  summarize(count = sum(!is.na(Depositors)),
+    median = median(Depositors, na.rm=T)) %>% 
+  kable() %>% kable_styling(position = "left",full_width = F)
+
+```
+## Hypothesis 5
+```{r}
+data %>% group_by(`ELNlinked`) %>% 
+  summarize(count = sum(!is.na(Depositors)),
+    median = median(Depositors, na.rm=T)) %>% 
+  kable() %>% kable_styling(position = "left",full_width = F)
+```
+## Hypothesis 6
+```{r}
+data %>% group_by(`Encryption`) %>% 
+  summarize(count = sum(!is.na(Depositors)),
+    median = median(Depositors, na.rm=T)) %>% 
+  kable() %>% kable_styling(position = "left",full_width = F)
+```
+## Hypothesis 7
+```{r}
+data %>% 
+  mutate(`Have Data Staff`=`Data Staff`>0) %>% 
+  group_by(`Have Data Staff`) %>% 
+  summarize(count = sum(!is.na(Depositors)),
+    median = median(Depositors, na.rm=T)) %>% 
+  kable() %>% kable_styling(position = "left",full_width = F)
+```
+Because of the class imbalance in "Have Data Staff" this was analyzed as a Spearman correlation with the number of data staff.
+```{r}
+coin::spearman_test(Depositors~`Data Staff`, data=data)
+```
+
+
+## Hypothesis 8
+```{r}
+coin::spearman_test(Depositors~`Age in Yrs`, data=data)
+```
+
+```{r}
+data %>% group_by(`Age in Yrs`) %>% 
+  summarize(count = sum(!is.na(Depositors)),
+    median = median(Depositors, na.rm=T)) %>% 
+  kable() %>% kable_styling(position = "left",full_width = F)
+```
