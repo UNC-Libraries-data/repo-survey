@@ -124,11 +124,18 @@ Because of the class imbalance in "Have Data Staff" this was analyzed as a Spear
 ```{r}
 coin::spearman_test(Depositors~`Data Staff`, data=data)
 ```
+```{r}
+with(data,cor(Depositors,`Data Staff`,method="spearman", use="complete.obs"))
+
+```
 
 
 ## Hypothesis 8
 ```{r}
 coin::spearman_test(Depositors~`Age in Yrs`, data=data)
+```
+```{r}
+with(data,cor(Depositors,`Age in Yrs`,method="spearman", use="complete.obs"))
 ```
 
 ```{r}
